@@ -58,17 +58,21 @@
     this.element.drag();
     // this.registerHover();
     this.element.click(function(e) {
-      that.svgEditor.stroke(that.element, GeoP.Colors.Selected);
-      geoP.currentEvent = e;
-      $scope.mode = 'edit';
-      $scope.currentOptions = [{
-        label: 'remove',
-        action: function() {
-          that.remove();
-          $scope.cleanCurrentOptions();
-        }
-      }];
-      $scope.$apply();
+      if ($scope.mode !== 'create') {
+        that.svgEditor.unSelectItems();
+        that.svgEditor.stroke(that.element, GeoP.Colors.Selected);
+        geoP.currentEvent = e;
+        $scope.mode = 'edit';
+        $scope.currentOptions = [{
+          label: 'remove',
+          action: function() {
+            that.remove();
+            $scope.cleanCurrentOptions();
+          }
+        }];
+        $scope.$apply();
+      }
+
     });
   };
 

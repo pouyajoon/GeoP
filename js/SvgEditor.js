@@ -21,16 +21,24 @@
     // this.paper.node.addEventListener("DOMMouseScroll", mousewheel, false);
 
     this.paper.click(function(e) {
+      console.log($scope.mode);
       if (geoP.currentEvent === null && $scope.mode !== 'create') {
-        for (var i = 0; i < that.items.length; i++) {
-          var item = that.items[i];
-          that.stroke(item.element, GeoP.Colors.NotSelected);
-        };
+
+        that.unSelectItems();
         $scope.cleanCurrentOptions();
         $scope.$apply();
       }
       geoP.currentEvent = null;
     });
+  };
+
+  SvgEditor.prototype.unSelectItems = function() {
+    var that = this;
+    for (var i = 0; i < that.items.length; i++) {
+      var item = that.items[i];
+      that.stroke(item.element, GeoP.Colors.NotSelected);
+    };
+
   };
 
   SvgEditor.prototype.createPolylineMode = function(e) {
