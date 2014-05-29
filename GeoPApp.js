@@ -1,4 +1,4 @@
-function SigCtrl($scope) {
+function GeoPCtrl($scope) {
 
   var editor = new GeoP.SvgEditor("#main", $scope);
   $scope.mode = 'normal';
