@@ -8,6 +8,8 @@ svg#main {
   width: 100%;
   height: 400px;
   background-color: #efefef; }
+  svg#main.create:hover {
+    cursor: crosshair; }
 
 ul {
   display: inline-block; }

@@ -9,6 +9,10 @@ svg#main{
   width:100%;
   height:400px;
   background-color: #efefef;
+
+  &.create:hover{
+    cursor: crosshair;
+  }
 }
 
 ul{

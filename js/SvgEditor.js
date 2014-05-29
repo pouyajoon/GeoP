@@ -3,33 +3,49 @@
 (function(geoP) {
   "use strict";
 
-  var createPolylineLine = null;
-  var createPolylinePolyline = null;
 
   var a = Snap;
 
-  var SvgEditor = function(svgId) {
+  var SvgEditor = function(svgId, $scope) {
+    var that = this;
     this.paper = a(svgId);
+    // this.$scope = $scope;
+    this.createPolylineLine = null;
+    this.createPolylinePolyline = null;
+
+    this.items = [];
+
+    this.paper.click(function(e) {
+      if (geoP.currentEvent === null && $scope.mode !== 'create') {
+        for (var i = 0; i < that.items.length; i++) {
+          var item = that.items[i];
+          that.stroke(item.element, GeoP.Colors.NotSelected);
+        };
+        $scope.cleanCurrentOptions();
+        $scope.$apply();
+      }
+      geoP.currentEvent = null;
+    });
   };
 
   SvgEditor.prototype.createPolylineMode = function(e) {
-    if (createPolylinePolyline === null) {
-      createPolylinePolyline = new geoP.Polyline(this);
-      createPolylinePolyline.create(e.offsetX, e.offsetY);
+    if (this.createPolylinePolyline === null) {
+      this.createPolylinePolyline = new geoP.Polyline(this);
+      this.createPolylinePolyline.create(e.offsetX, e.offsetY);
     } else {
-      createPolylinePolyline.appendPoint(e.offsetX, e.offsetY);
+      this.createPolylinePolyline.appendPoint(e.offsetX, e.offsetY);
     }
   };
 
   SvgEditor.prototype.drawToMousePosition = function(e) {
-    if (createPolylinePolyline !== null) {
-      var lastPoint = createPolylinePolyline.getLastPoint();
+    if (this.createPolylinePolyline !== null) {
+      var lastPoint = this.createPolylinePolyline.getLastPoint();
       if (lastPoint !== null) {
-        if (createPolylineLine === null) {
-          createPolylineLine = this.paper.line(lastPoint.x, lastPoint.y, e.offsetX, e.offsetY);
-          this.stroke(createPolylineLine, 'green');
+        if (this.createPolylineLine === null) {
+          this.createPolylineLine = this.paper.line(lastPoint.x, lastPoint.y, e.offsetX, e.offsetY);
+          this.stroke(this.createPolylineLine, 'green');
         } else {
-          createPolylineLine.animate({
+          this.createPolylineLine.animate({
             x1: lastPoint.x,
             y1: lastPoint.y,
             x2: e.offsetX,
@@ -59,38 +75,36 @@
     function finishCreateMode() {
       that.paper.unclick(createMode);
       that.paper.unmousemove(move);
-      if (createPolylineLine !== null) {
-        createPolylineLine.remove();
+      if (that.createPolylineLine !== null) {
+        that.createPolylineLine.remove();
       }
-      createPolylinePolyline = null;
-      createPolylineLine = null;
-      $scope.currentOptions = [];
+      that.createPolylinePolyline = null;
+      that.createPolylineLine = null;
+      $scope.cleanCurrentOptions();
+    }
 
+    function cancelCurrentPolyline() {
+      if (that.createPolylinePolyline !== null) {
+        that.createPolylinePolyline.remove();
+      }
+      finishCreateMode();
     }
 
     return [{
       label: 'close',
       action: function() {
-        if (createPolylinePolyline !== null) {
-          createPolylinePolyline.close();
+        if (that.createPolylinePolyline !== null) {
+          that.createPolylinePolyline.close($scope);
+          that.items.push(that.createPolylinePolyline);
         }
         finishCreateMode();
       }
     }, {
-      label: 'remove',
-      action: function() {
-        if (createPolylinePolyline !== null) {
-          createPolylinePolyline.remove();
-        }
-        finishCreateMode();
-      }
+      label: 'cancel',
+      action: cancelCurrentPolyline
     }];
-
   };
 
-  // SvgEditor.prototype.closePolyline = function() {
-
-  // };
 
   geoP.SvgEditor = SvgEditor;
 
