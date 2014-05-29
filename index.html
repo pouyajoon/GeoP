@@ -15,7 +15,7 @@
 
 </head>
 <body ng-controller="GeoPCtrl">
-  <div>
+  <div class="options">
     <ul>
       <li ng-repeat="b in buttons"><button ng-click="b.action()">{{b.label}}</button></li>
     </ul>
@@ -24,6 +24,6 @@
     </ul>
 
   </div>
-  <svg id="main" ng-class="mode"/>
+  <svg id="main" ng-class="[mode, 'shift-' + isShift]"/>
 </body>
 </html>

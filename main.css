@@ -1,17 +1,24 @@
 body {
   font-size: 12px;
   margin: 0px;
-  padding: 0px; }
+  padding: 0px;
+  text-align: center; }
 
 svg#main {
-  border: 1px solid green;
-  width: 100%;
+  border: 2px solid blue;
+  width: 98%;
+  margin: 0px auto;
   height: 400px;
   background-color: #efefef; }
   svg#main.create:hover {
     cursor: crosshair; }
+  svg#main.shift-true {
+    border: 2px dotted green;
+    opacity: 0.95; }
 
-ul {
-  display: inline-block; }
-  ul li {
+div.options {
+  text-align: left; }
+  div.options ul {
     display: inline-block; }
+    div.options ul li {
+      display: inline-block; }

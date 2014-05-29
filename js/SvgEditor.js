@@ -3,17 +3,22 @@
 (function(geoP) {
   "use strict";
 
-
   var a = Snap;
 
   var SvgEditor = function(svgId, $scope) {
     var that = this;
     this.paper = a(svgId);
-    // this.$scope = $scope;
+    this.$scope = $scope;
     this.createPolylineLine = null;
     this.createPolylinePolyline = null;
-
+    this.newPoint = null;
     this.items = [];
+
+    // function mousewheel(e) {
+    //   console.log('mousewheel', e);
+    // }
+    // this.paper.node.addEventListener("mousewheel", mousewheel, false);
+    // this.paper.node.addEventListener("DOMMouseScroll", mousewheel, false);
 
     this.paper.click(function(e) {
       if (geoP.currentEvent === null && $scope.mode !== 'create') {
@@ -33,9 +38,67 @@
       this.createPolylinePolyline = new geoP.Polyline(this);
       this.createPolylinePolyline.create(e.offsetX, e.offsetY);
     } else {
-      this.createPolylinePolyline.appendPoint(e.offsetX, e.offsetY);
+      this.createPolylinePolyline.appendPoint(this.newPoint.x, this.newPoint.y);
     }
   };
+
+  function toDeg(rad) {
+    return rad * 180 / Math.PI;
+  }
+
+  function getAngle(cx, cy, ex, ey) {
+    var dx = ex - cx;
+    var dy = ey - cy;
+    var theta = Math.atan2(dy, dx);
+    theta *= 180 / Math.PI // rads to degs
+    return theta;
+  }
+
+  function v2(angle, power) {
+    var x = Math.sin(angle);
+    var y = Math.cos(angle);
+    x *= power;
+    y *= power;
+    return {
+      x: x,
+      y: y
+    };
+  }
+
+  function power(v) {
+    return v * v;
+  }
+
+  function hyp(newPoint, lastPoint) {
+    var pow = power(newPoint.x - lastPoint.x) + power(newPoint.y - lastPoint.y);
+    var sqrt = Math.sqrt(pow);
+    return sqrt;
+  }
+
+  function updateNewPointFromAngle(a, newPoint, lastPoint) {
+    var v = v2(a, hyp(newPoint, lastPoint));
+    newPoint.x = lastPoint.x + v.x;
+    newPoint.y = lastPoint.y + v.y;
+  }
+
+  function updateNewPositionIfShift($scope, newPoint, lastPoint) {
+    if ($scope.isShift === true) {
+      var a = getAngle(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y);
+      if ((a > -22.5 && a < 22.5) || (a < -157.5 || a > 157.5)) {
+        newPoint.y = lastPoint.y;
+      } else if (a >= 22.5 && a < 67.5) {
+        updateNewPointFromAngle(Math.PI / 4, newPoint, lastPoint);
+      } else if ((a >= 67.5 && a < 112.5) || (a > -112.5 && a < -67.5)) {
+        newPoint.x = lastPoint.x;
+      } else if (a > 112.5 && a < 157.5) {
+        updateNewPointFromAngle(Math.PI * 7 / 4, newPoint, lastPoint);
+      } else if (a < -22.5 && a > -67.5) {
+        updateNewPointFromAngle(Math.PI * 3 / 4, newPoint, lastPoint);
+      } else if (a < -112.5 && a > -157.5) {
+        updateNewPointFromAngle(Math.PI * 5 / 4, newPoint, lastPoint);
+      }
+    }
+  }
 
   SvgEditor.prototype.drawToMousePosition = function(e) {
     if (this.createPolylinePolyline !== null) {
@@ -45,11 +108,18 @@
           this.createPolylineLine = this.paper.line(lastPoint.x, lastPoint.y, e.offsetX, e.offsetY);
           this.stroke(this.createPolylineLine, 'green');
         } else {
+          this.newPoint = {
+            x: e.offsetX,
+            y: e.offsetY
+          };
+
+          updateNewPositionIfShift(this.$scope, this.newPoint, lastPoint);
+
           this.createPolylineLine.animate({
             x1: lastPoint.x,
             y1: lastPoint.y,
-            x2: e.offsetX,
-            y2: e.offsetY
+            x2: this.newPoint.x,
+            y2: this.newPoint.y
           }, 5);
         }
       }
