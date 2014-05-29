@@ -1,0 +1,10 @@
+body {
+  font-size: 12px;
+  margin: 0px;
+  padding: 0px; }
+
+svg#main {
+  border: 1px solid green;
+  width: 100%;
+  height: 400px;
+  background-color: #efefef; }
